@@ -1,0 +1,5 @@
+door
+column
+opening
+room
+window

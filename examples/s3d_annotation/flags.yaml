@@ -1,0 +1,11 @@
+room:
+  - 'height(m):{v:3.20}'
+window:
+  - 'height(m):{v:1.40}'
+  - 'paraphet_height(m):{v:0.90}'
+door:
+  - 'height(m):{v:2.00}'
+opening:
+  - 'height(m):{v:2.00}'
+column:
+  - 'height(m):{v:3.20}'
