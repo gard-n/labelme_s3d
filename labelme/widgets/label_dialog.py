@@ -51,9 +51,7 @@ class LabelDialog(QtWidgets.QDialog):
             self.edit.textChanged.connect(self.updateFlags)
         self.edit_group_id = QtWidgets.QLineEdit()
         self.edit_group_id.setPlaceholderText("Group ID")
-        self.edit_group_id.setValidator(
-            QtGui.QRegExpValidator(QtCore.QRegExp(r"\d*"), None)
-        )
+        self.edit_group_id.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp(r"\d*"), None))
         layout = QtWidgets.QVBoxLayout()
         if show_text_field:
             layout_edit = QtWidgets.QHBoxLayout()
@@ -106,10 +104,7 @@ class LabelDialog(QtWidgets.QDialog):
         # completion
         completer = QtWidgets.QCompleter()
         if not QT5 and completion != "startswith":
-            logger.warn(
-                "completion other than 'startswith' is only "
-                "supported with Qt5. Using 'startswith'"
-            )
+            logger.warn("completion other than 'startswith' is only " "supported with Qt5. Using 'startswith'")
             completion = "startswith"
         if completion == "startswith":
             completer.setCompletionMode(QtWidgets.QCompleter.InlineCompletion)
@@ -181,8 +176,21 @@ class LabelDialog(QtWidgets.QDialog):
     def setFlags(self, flags):
         self.deleteFlags()
         for key in flags:
-            item = QtWidgets.QCheckBox(key, self)
-            item.setChecked(flags[key])
+            pattern = re.compile(r"([a-zA-Z0-9_()]+):\{v:([0-9]*\.?[0-9]+)\}")
+            match = pattern.search(key)
+            if match:
+                key_ = match.group(1)
+                default_ = float(match.group(2))
+                item = QtWidgets.QDoubleSpinBox(self)
+                item.setValue(default_)
+                item.setDecimals(2)  # Adjust the number of decimal places if needed
+                item.setSingleStep(0.01)
+                item.setMinimum(0.1)
+                item.setPrefix(f"{key_}: ")  # Optional: Label prefix
+                item.setToolTip(f"Enter a float value for {key_}")
+            else:
+                item = QtWidgets.QCheckBox(key, self)
+                item.setChecked(flags[key])
             self.flagsLayout.addWidget(item)
             item.show()
 
@@ -190,7 +198,12 @@ class LabelDialog(QtWidgets.QDialog):
         flags = {}
         for i in range(self.flagsLayout.count()):
             item = self.flagsLayout.itemAt(i).widget()
-            flags[item.text()] = item.isChecked()
+            if isinstance(item, QtWidgets.QDoubleSpinBox):
+                prefix = item.prefix().strip(": ").strip()
+                value = item.value()
+                flags[f"{prefix}:{{v:{value:.2f}}}"] = value
+            elif isinstance(item, QtWidgets.QCheckBox):
+                flags[item.text()] = item.isChecked()
         return flags
 
     def getGroupId(self):
@@ -201,9 +214,7 @@ class LabelDialog(QtWidgets.QDialog):
 
     def popUp(self, text=None, move=True, flags=None, group_id=None, description=None):
         if self._fit_to_content["row"]:
-            self.labelList.setMinimumHeight(
-                self.labelList.sizeHintForRow(0) * self.labelList.count() + 2
-            )
+            self.labelList.setMinimumHeight(self.labelList.sizeHintForRow(0) * self.labelList.count() + 2)
         if self._fit_to_content["column"]:
             self.labelList.setMinimumWidth(self.labelList.sizeHintForColumn(0) + 2)
         # if text is None, the previous label in self.edit is kept
