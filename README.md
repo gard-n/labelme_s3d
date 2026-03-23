@@ -219,7 +219,30 @@ ruff check  # `ruff check --fix` to auto-fix
 MPLBACKEND='agg' pytest -vsx tests/
 ```
 
+## Labelme to s3D
+
+```bash
+# setupt labelme and install requirements-dev.txt (s.o.)
+conda activate labelme
+# open your image file in the editor
+python.exe -m labelme.__main__ --labels examples/s3d_annotation/labels.txt --labelflags examples/s3d_annotation/flags.yaml image.jpg
+# Create rooms as polygons or rectangles
+# Create doors and windows as rectangles intersecting both connected room polygons
+# IMPORTANT: add a reference length to at least one door or window by adding "ref: 1.0" (for a width of 1m) to the description field
+# convert output to zind
+python lableme_to_zind.py --path_in image.json --path_out ./test/0001/zind_data.json
+
+# activate spvloc
+# setup spvloc (https://github.com/fraunhoferhhi/spvloc)
+conda activate spvloc
+cd ..
+cd spvloc
+python -m spvloc.tools.zind_to_s3d -i "../labelme_s3d/test" -o "../labelme_s3d/output" --mesh_out --index 1
+```
+
 
 ## Acknowledgement
 
 This repo is the fork of [mpitid/pylabelme](https://github.com/mpitid/pylabelme).
+
+
