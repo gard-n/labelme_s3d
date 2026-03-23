@@ -2,6 +2,7 @@ import json
 import sys
 import argparse
 import re
+import os
 import numpy as np
 from shapely.geometry import Polygon, LineString
 
@@ -58,6 +59,10 @@ def extract_opening_flags(flags):
 
 
 def save_dict_to_json(dictionary, json_path_out):
+    folder = os.path.dirname(json_path_out)
+    if folder and not os.path.exists(folder):
+        os.makedirs(folder, exist_ok=True)
+
     with open(json_path_out, "w") as json_file:
         json.dump(dictionary, json_file, indent=4)
 
